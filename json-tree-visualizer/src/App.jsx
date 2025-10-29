@@ -1,34 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useCallback } from 'react'
+import { ReactFlowProvider } from 'reactflow'
+import JsonInput from './components/JsonInput/JsonInput'
+import JsonTree from './components/JsonTree/JsonTree'
+import SearchBar from './components/SearchBar/SearchBar'
+import './App.scss'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [jsonData, setJsonData] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [error, setError] = useState('')
+
+  const handleJsonParse = useCallback((data) => {
+    setJsonData(data)
+    setError('')
+  }, [])
+
+  const handleJsonError = useCallback((errorMessage) => {
+    setError(errorMessage)
+    setJsonData(null)
+  }, [])
+
+  const handleSearch = useCallback((term) => {
+    setSearchTerm(term)
+  }, [])
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app">
+      <header className="app-header">
+        <h1>JSON Tree Visualizer</h1>
+      </header>
+      
+      <div className="app-content">
+        <div className="input-section">
+          <JsonInput 
+            onJsonParse={handleJsonParse}
+            onJsonError={handleJsonError}
+          />
+          {error && <div className="error-message">{error}</div>}
+        </div>
+        
+        <div className="visualization-section">
+          <SearchBar onSearch={handleSearch} />
+          <div className="tree-container">
+            <ReactFlowProvider>
+              <JsonTree 
+                jsonData={jsonData} 
+                searchTerm={searchTerm}
+              />
+            </ReactFlowProvider>
+          </div>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
